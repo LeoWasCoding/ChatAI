@@ -1,12 +1,18 @@
 <?php
 
-namespace leo\chat;
+namespace YourNamespace;
 
 use pocketmine\event\Listener;
 use pocketmine\event\player\PlayerChatEvent;
 use pocketmine\plugin\PluginBase;
+use pocketmine\scheduler\Task;
+use pocketmine\utils\Config;
 
 class Main extends PluginBase implements Listener {
+
+    private $config;
+    private $wordList;
+    private $wordIndex;
 
     public function onEnable() {
         $this->getServer()->getPluginManager()->registerEvents($this, $this);
@@ -14,27 +20,57 @@ class Main extends PluginBase implements Listener {
 
         // Load the config.yml file
         $this->saveDefaultConfig();
-        $this->reloadConfig();
+        $this->config = new Config($this->getDataFolder() . "config.yml", Config::YAML);
+
+        // Initialize word list and index
+        $this->wordList = $this->config->get("word_list", []);
+        $this->wordIndex = 0;
+
+        // Schedule task to give words every 5 minutes
+        $this->getScheduler()->scheduleRepeatingTask(new class($this) extends Task {
+            private $plugin;
+
+            public function __construct(Main $plugin) {
+                $this->plugin = $plugin;
+            }
+
+            public function onRun(int $currentTick) {
+                $word = $this->plugin->getNextWord();
+                $this->plugin->broadcastWord($word);
+            }
+        }, 20 * 60 * 5);
     }
 
     public function onPlayerChat(PlayerChatEvent $event) {
+        // Check if the player's message matches the unscrambled word
         $message = $event->getMessage();
-        $message = strtolower($message);
+        $word = $this->getCurrentWord();
 
-        // Load the conversations from the config file
-        $conversations = $this->getConfig()->get("conversations", []);
-
-        // Iterate through the conversations and check if the message matches any of the questions
-        foreach ($conversations as $conversation) {
-            $question = strtolower($conversation['question']);
-            $response = $conversation['response'];
-
-            if (strpos($message, $question) !== false) {
-                $player = $event->getPlayer();
-                $response = str_replace("{player}", $player->getName(), $response);
-                $player->sendMessage($response);
-                break;
-            }
+        if (strcasecmp($message, $word) === 0) {
+            // Word unscrambled correctly, reward the player
+            $player = $event->getPlayer();
+            $reward = $this->config->get("reward", 1000);
+            $this->getServer()->getPluginManager()->getPlugin("BedrockEconomy")->giveMoney($player, $reward);
+            $player->sendMessage("Congratulations! You unscrambled the word and received $" . $reward);
         }
+    }
+
+    private function getNextWord() {
+        $wordCount = count($this->wordList);
+        $word = $this->wordList[$this->wordIndex];
+        $this->wordIndex = ($this->wordIndex + 1) % $wordCount;
+        return $word;
+    }
+
+    private function getCurrentWord() {
+        $wordCount = count($this->wordList);
+        $wordIndex = ($this->wordIndex - 1 + $wordCount) % $wordCount;
+        return $this->wordList[$wordIndex];
+    }
+
+    private function broadcastWord($word) {
+        $message = $this->config->get("message", "Unscramble the word: {word}");
+        $message = str_replace("{word}", $word, $message);
+        $this->getServer()->broadcastMessage($message);
     }
 }
