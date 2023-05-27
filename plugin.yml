@@ -2,4 +2,9 @@ name: ChatAI
 author: ExterLeo
 api: 4.21.0
 main: leo\chat\main
-depends: [BedrockEconomy]
+depend: [BedrockEconomy]
+
+commands: chatbot: description: "Manage the ChatBot plugin" usage: "/chatbot <reload>" 
+aliases: [cb] 
+permissions: chatbot.admin: 
+description: "Allows access to ChatBotPlugin admin commands" default: op
