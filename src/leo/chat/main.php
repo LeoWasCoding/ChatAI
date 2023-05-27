@@ -22,7 +22,7 @@ class Main extends PluginBase implements Listener {
         // Check if the message contains "hi"
         if (strpos($message, 'hi') !== false) {
             $player = $event->getPlayer();
-            $player->sendMessage("Hi there, ".$player->getName()."!");
+            $player->sendMessage("Hey there, ".$player->getName()."!");
         }
     }
 }
