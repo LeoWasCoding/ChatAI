@@ -1,0 +1,12 @@
+# config.yml
+
+# Questions and their corresponding responses
+conversations:
+  - question: "hi"
+    response: "Hi there, {player}!"
+  - question: "how are you"
+    response: "I'm a bot, I don't have feelings."
+  - question: "what's your name"
+    response: "You can call me ChatBot."
+  - question: "what's the time"
+    response: "I'm sorry, I don't have access to the current time."
