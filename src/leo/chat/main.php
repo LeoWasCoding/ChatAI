@@ -1,6 +1,6 @@
 <?php
 
-namespace YourNamespace;
+namespace leo\chat;
 
 use pocketmine\event\Listener;
 use pocketmine\event\player\PlayerChatEvent;
