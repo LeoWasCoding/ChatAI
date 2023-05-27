@@ -2,3 +2,4 @@ name: ChatAI
 author: ExterLeo
 api: 4.21.0
 main: leo\chat\main
+depends: [BedrockEconomy]
