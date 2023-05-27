@@ -11,19 +11,30 @@ class Main extends PluginBase implements Listener {
     public function onEnable() {
         $this->getServer()->getPluginManager()->registerEvents($this, $this);
         $this->getLogger()->info("ChatBotPlugin enabled!");
+
+        // Load the config.yml file
+        $this->saveDefaultConfig();
+        $this->reloadConfig();
     }
 
     public function onPlayerChat(PlayerChatEvent $event) {
         $message = $event->getMessage();
-
-        // Convert the message to lowercase for case-insensitive comparison
         $message = strtolower($message);
 
-        // Check if the message contains "hi"
-        if (strpos($message, 'hi') !== false) {
-            $player = $event->getPlayer();
-            $player->sendMessage("Hey there, ".$player->getName()."!");
+        // Load the conversations from the config file
+        $conversations = $this->getConfig()->get("conversations", []);
+
+        // Iterate through the conversations and check if the message matches any of the questions
+        foreach ($conversations as $conversation) {
+            $question = strtolower($conversation['question']);
+            $response = $conversation['response'];
+
+            if (strpos($message, $question) !== false) {
+                $player = $event->getPlayer();
+                $response = str_replace("{player}", $player->getName(), $response);
+                $player->sendMessage($response);
+                break;
+            }
         }
     }
 }
-
