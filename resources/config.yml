@@ -1,5 +1,6 @@
 # config.yml
-
+depend:
+  - BedrockEconomy
 # Questions and their corresponding responses
 conversations:
   - question: "hi"
